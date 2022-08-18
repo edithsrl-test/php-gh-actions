@@ -1,0 +1,105 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - "main"
+
+env:
+  PHP_VERSION: '8.1'
+  NODE_VERSION: '14.x'
+
+jobs:
+  composer:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: |
+          echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Set up dependency caching for faster installs
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-dev --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: composer-vendor
+          path: ./vendor/
+
+  webpack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "yarn"
+
+      - name: yarn install and build
+        run: |
+          yarn install
+          yarn run build
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v3
+        with:
+          name: webpack-assets
+          path: ./public/build/
+
+  push:
+    runs-on: ubuntu-latest
+
+    needs:
+      - composer
+      - webpack
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Download artifact from build jobs
+        uses: actions/download-artifact@v3
+
+      - name: Checkout release branch
+        uses: actions/checkout@v3
+        with:
+          - ref: 'release'
+          - path: '.tmp'
+          - clean: false
+
+      - uses: actions/checkout@v3
+      - run: |
+          rm -rf .git
+          mv .tmp/.git .git
+          rm -rf .tmp
+          echo "${{ env.GITHUB_SHA }}" > BUILD.txt
+          rm .gitignore
+          mv .gitignore.release .gitignore
+          git config user.name "${{ env.GITHUB_ACTOR }}"
+          git config user.email "${{ env.GITHUB_ACTOR }}@users.noreply.github.com"
+          git add .
+          git commit -m '[skip ci] release'
+          git push release
