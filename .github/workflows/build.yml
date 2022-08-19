@@ -104,4 +104,4 @@ jobs:
           git checkout release
           git add .
           git commit -m '[skip ci] release'
-          git push release
+          git push origin release
