@@ -86,9 +86,9 @@ jobs:
       - name: Checkout release branch
         uses: actions/checkout@v3
         with:
-          - ref: 'release'
-          - path: '.tmp'
-          - clean: false
+          ref: 'release'
+          path: '.tmp'
+          clean: false
 
       - uses: actions/checkout@v3
       - run: |
