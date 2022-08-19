@@ -38,16 +38,19 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Install Composer dependencies
-        run: composer install --no-dev --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
+        run: |
+          composer install --no-dev --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
 
       - name: Compress artifact
-        run: 7z a -spf vendor.7z vendor/
+        run: |
+          7z a vendor.7z vendor/
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: composer-vendor
-          path: ./vendor.7z
+          path: vendor.7z
+          retention-days: 1
 
   webpack:
     runs-on: ubuntu-latest
@@ -61,22 +64,29 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
-      - name: yarn install and build
+      - name: Install Yarn dependencies
         run: |
           yarn install
+
+      - name: Build assets
+        run: |
           yarn run build
 
       - name: Compress artifact
-        run: 7z a -spf assets.7z public/build/
+        run: |
+          7z a assets.7z public/build/
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: webpack-assets
-          path: ./assets.7z
+          path: assets.7z
+          retention-days: 1
 
   push:
     runs-on: ubuntu-latest
+
+    environment: production
 
     needs:
       - composer
@@ -89,11 +99,13 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@v3
 
-      - run: |
-          7z x ./composer-vendor/vendor.7z && rm ./composer-vendor/vendor.7z
-          7z x ./webpack-assets/assets.7z && rm ./webpack-assets/assets.7z
+      - name: Extract artifacts
+        run: |
+          7z x composer-vendor/vendor.7z && rm composer-vendor/vendor.7z
+          7z x webpack-assets/assets.7z && rm webpack-assets/assets.7z
 
-      - run: |
+      - name: Push changes
+        run: |
           echo "$GITHUB_SHA" > BUILD.txt
           rm .gitignore
           mv .gitignore.release .gitignore
