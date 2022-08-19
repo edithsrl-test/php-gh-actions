@@ -41,7 +41,7 @@ jobs:
         run: composer install --no-dev --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
 
       - name: Compress artifact
-        run: 7z a vendor.7z ./vendor/
+        run: 7z a vendor.7z vendor/
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
@@ -67,7 +67,7 @@ jobs:
           yarn run build
 
       - name: Compress artifact
-        run: 7z a assets.7z ./public/build/
+        run: 7z a assets.7z public/build/
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
