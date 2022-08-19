@@ -40,11 +40,14 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-dev --prefer-dist --no-ansi --no-interaction --no-progress --no-scripts
 
+      - name: Compress artifact
+        run: 7z a vendor.7z ./vendor/
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: composer-vendor
-          path: ./vendor/
+          path: ./vendor.7z
 
   webpack:
     runs-on: ubuntu-latest
@@ -63,11 +66,14 @@ jobs:
           yarn install
           yarn run build
 
+      - name: Compress artifact
+        run: 7z a assets.7z ./public/build/
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v3
         with:
           name: webpack-assets
-          path: ./public/build/
+          path: ./assets.7z
 
   push:
     runs-on: ubuntu-latest
@@ -80,17 +86,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Download artifact from composer job
+      - name: Download artifacts
         uses: actions/download-artifact@v3
         with:
-          name: composer-vendor
-          path: ./vendor/
+          path: ./
 
-      - name: Download artifact from webpack job
-        uses: actions/download-artifact@v3
-        with:
-          name: webpack-assets
-          path: ./public/build/
+      - run: |
+          7z x ./vendor.7z
+          7z x ./assets.7z
+          rm ./vendor.7z ./assets.7z
 
       - run: |
           echo "$GITHUB_SHA" > BUILD.txt
