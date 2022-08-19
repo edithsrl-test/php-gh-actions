@@ -88,13 +88,10 @@ jobs:
 
       - name: Download artifacts
         uses: actions/download-artifact@v3
-        with:
-          path: ./
 
       - run: |
-          7z x ./vendor.7z
-          7z x ./assets.7z
-          rm ./vendor.7z ./assets.7z
+          7z x ./composer-vendor/vendor.7z && rm ./composer-vendor/vendor.7z
+          7z x ./webpack-assets/assets.7z && rm ./webpack-assets/assets.7z
 
       - run: |
           echo "$GITHUB_SHA" > BUILD.txt
