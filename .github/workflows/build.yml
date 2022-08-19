@@ -64,6 +64,13 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'yarn'
 
+      - name: Set up SSH access to private repo
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.METRONIC_DEPLOY_KEY }}
+        run: |
+          git config url."git@github.com:".insteadOf https://github.com/
+
       - name: Install Yarn dependencies
         run: |
           yarn install
