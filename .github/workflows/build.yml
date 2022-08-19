@@ -3,7 +3,7 @@ name: Build
 on:
   push:
     branches:
-      - "main"
+      - 'main'
 
 env:
   PHP_VERSION: '8.1'
@@ -56,7 +56,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "yarn"
+          cache: 'yarn'
 
       - name: yarn install and build
         run: |
@@ -80,8 +80,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Download artifact from build jobs
+      - name: Download artifact from composer job
         uses: actions/download-artifact@v3
+        with:
+          name: composer-vendor
+          path: ./vendor/
+
+      - name: Download artifact from webpack job
+        uses: actions/download-artifact@v3
+        with:
+          name: webpack-assets
+          path: ./public/build/
 
       - name: Checkout release branch
         uses: actions/checkout@v3
@@ -90,16 +99,15 @@ jobs:
           path: '.tmp'
           clean: false
 
-      - uses: actions/checkout@v3
       - run: |
           rm -rf .git
           mv .tmp/.git .git
           rm -rf .tmp
-          echo "${{ env.GITHUB_SHA }}" > BUILD.txt
+          echo "$GITHUB_SHA" > BUILD.txt
           rm .gitignore
           mv .gitignore.release .gitignore
-          git config user.name "${{ env.GITHUB_ACTOR }}"
-          git config user.email "${{ env.GITHUB_ACTOR }}@users.noreply.github.com"
+          git config user.name "${GITHUB_ACTOR}"
+          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
           git add .
           git commit -m '[skip ci] release'
           git push release
