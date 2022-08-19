@@ -71,7 +71,7 @@ jobs:
 
       - name: Install Yarn dependencies
         run: |
-          git config url."git@github.com:".insteadOf https://github.com/
+          git config --global url."git@github.com:".insteadOf https://github.com/
           yarn install
 
       - name: Build assets
