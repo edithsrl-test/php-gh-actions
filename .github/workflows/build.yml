@@ -68,11 +68,10 @@ jobs:
         uses: webfactory/ssh-agent@v0.5.4
         with:
             ssh-private-key: ${{ secrets.METRONIC_DEPLOY_KEY }}
-        run: |
-          git config url."git@github.com:".insteadOf https://github.com/
 
       - name: Install Yarn dependencies
         run: |
+          git config url."git@github.com:".insteadOf https://github.com/
           yarn install
 
       - name: Build assets
