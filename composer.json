@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.2",
+        "edith/php-gh-packages": "dev-main",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^9.19",
         "laravel/sanctum": "^3.0",
@@ -20,6 +21,12 @@
         "phpunit/phpunit": "^9.5.10",
         "spatie/laravel-ignition": "^1.0"
     },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/edithsrl-test/php-gh-packages.git"
+        }
+    ],
     "autoload": {
         "psr-4": {
             "App\\": "app/",
