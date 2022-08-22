@@ -24,7 +24,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:edithsrl-test/php-gh-packages.git"
+            "url": "https://github.com/edithsrl-test/php-gh-packages.git"
         }
     ],
     "autoload": {
