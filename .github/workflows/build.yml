@@ -36,6 +36,11 @@ jobs:
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
             ${{ runner.os }}-composer-
+            
+      - name: Set up SSH access to private repo
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+            ssh-private-key: ${{ secrets.METRONIC_DEPLOY_KEY }}
 
       - name: Install Composer dependencies
         run: |
